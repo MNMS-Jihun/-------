@@ -1,0 +1,45 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build executable
+        run: |
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            python -m PyInstaller --onefile --console --name "유니코드제거기" app.py
+          else
+            python3 -m PyInstaller --onefile --console --name "유니코드제거기" app.py
+            chmod +x dist/유니코드제거기
+          fi
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 유니코드제거기-${{ runner.os }}
+          path: |
+            dist/유니코드제거기.exe
+            dist/유니코드제거기
+          if-no-files-found: error
+          retention-days: 90

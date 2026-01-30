@@ -1,0 +1,104 @@
+name: Build Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      build_windows:
+        description: 'Build Windows executable'
+        required: true
+        default: 'true'
+        type: boolean
+      build_macos:
+        description: 'Build macOS executable'
+        required: true
+        default: 'true'
+        type: boolean
+
+jobs:
+  build-windows:
+    if: github.event.inputs.build_windows != 'false'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Build Windows executable
+        run: |
+          python -m PyInstaller --onefile --console --name "유니코드제거기" app.py
+      
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 유니코드제거기-windows
+          path: dist/유니코드제거기.exe
+          retention-days: 90
+
+  build-macos:
+    if: github.event.inputs.build_macos != 'false'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+      
+      - name: Build macOS executable
+        run: |
+          python3 -m PyInstaller --onefile --console --name "유니코드제거기" app.py
+          chmod +x dist/유니코드제거기
+      
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 유니코드제거기-macos
+          path: dist/유니코드제거기
+          retention-days: 90
+
+  release:
+    needs: [build-windows, build-macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 유니코드제거기-windows
+          path: release/
+      
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 유니코드제거기-macos
+          path: release/
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/유니코드제거기.exe
+            release/유니코드제거기
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
