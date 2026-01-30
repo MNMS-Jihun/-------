@@ -31,7 +31,16 @@ def remove_unicode_spaces(text):
     # - \u00AD: Soft hyphen (하이픈)
     
     # 정규식으로 모든 특수 공백을 일반 공백으로 변환
-    text = re.sub(r'[\u00A0\u00AD\u2000-\u200B\u202F\u205F\u3000\uFEFF]', ' ', text)
+    # 모든 유니코드 공백 문자 (U+0020 제외)를 포함:
+    # - \u00A0: Non-breaking space
+    # - \u1680: Ogham space mark
+    # - \u2000-\u200B: 다양한 공백들 (en space, em space, thin space 등)
+    # - \u202F: Narrow no-break space
+    # - \u205F: Medium mathematical space
+    # - \u3000: Ideographic space (전각 공백)
+    # - \uFEFF: Zero-width no-break space (BOM)
+    # - \u00AD: Soft hyphen (하이픈)
+    text = re.sub(r'[\u00A0\u00AD\u1680\u2000-\u200B\u202F\u205F\u3000\uFEFF]', ' ', text)
     
     # 연속된 공백을 하나로 정리 (선택사항)
     text = re.sub(r' +', ' ', text)
