@@ -27,20 +27,26 @@ if errorlevel 1 (
 )
 
 echo [2/3] 빌드 중... (잠시만 기다려주세요)
-python -m PyInstaller --onefile --console --name "유니코드제거기" --clean app.py
+python -m PyInstaller --onefile --console --name "UnicodeCleaner" --clean app.py
 if errorlevel 1 (
     echo [오류] 빌드 실패
     pause
     exit /b 1
 )
 
-echo [3/3] 완료!
-echo.
-echo ========================================
-echo 빌드 성공!
-echo ========================================
-echo.
-echo 실행 파일 위치: dist\유니코드제거기.exe
+echo [3/3] 파일 이름 변경 중...
+if exist "dist\UnicodeCleaner.exe" (
+    copy /Y "dist\UnicodeCleaner.exe" "dist\유니코드제거기.exe" >nul
+    echo ========================================
+    echo 빌드 성공!
+    echo ========================================
+    echo.
+    echo 실행 파일 위치: dist\유니코드제거기.exe
+) else (
+    echo [오류] 빌드된 파일을 찾을 수 없습니다.
+    pause
+    exit /b 1
+)
 echo.
 echo 이 파일을 다른 사람에게 전달하시면 됩니다.
 echo (Python 설치 없이도 실행 가능합니다)

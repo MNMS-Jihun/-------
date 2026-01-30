@@ -25,21 +25,60 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Build executable
+      - name: Build executable (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          if [ "${{ runner.os }}" == "Windows" ]; then
-            python -m PyInstaller --onefile --console --name "유니코드제거기" app.py
-          else
-            python3 -m PyInstaller --onefile --console --name "유니코드제거기" app.py
-            chmod +x dist/유니코드제거기
-          fi
+          $env:PYTHONIOENCODING = "utf-8"
+          $env:PYTHONUTF8 = "1"
+          Write-Host "Python version:"
+          python --version
+          Write-Host "Building executable..."
+          python -m PyInstaller --onefile --console --name "UnicodeCleaner" --clean app.py
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Build failed with exit code $LASTEXITCODE"
+            Write-Host "Checking dist folder:"
+            if (Test-Path "dist") {
+              Get-ChildItem -Path dist -Recurse | Format-Table FullName, Length
+            }
+            exit 1
+          }
+          Write-Host "Renaming executable..."
+          if (Test-Path "dist\UnicodeCleaner.exe") {
+            Copy-Item "dist\UnicodeCleaner.exe" "dist\유니코드제거기.exe" -Force
+            Write-Host "Executable renamed successfully"
+          } else {
+            Write-Host "Error: UnicodeCleaner.exe not found after build"
+            exit 1
+          }
       
-      - name: Upload artifact
+      - name: Build executable (macOS/Linux)
+        if: runner.os != 'Windows'
+        run: |
+          python3 -m PyInstaller --onefile --console --name "UnicodeCleaner" --clean app.py
+          chmod +x dist/UnicodeCleaner
+          cp dist/UnicodeCleaner dist/유니코드제거기
+      
+      - name: List build artifacts
+        shell: pwsh
+        run: |
+          Write-Host "Contents of dist folder:"
+          Get-ChildItem -Path dist -Recurse | Format-Table FullName, Length
+      
+      - name: Upload artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 유니코드제거기-windows
+          path: dist/유니코드제거기.exe
+          if-no-files-found: error
+          retention-days: 90
+      
+      - name: Upload artifact (macOS/Linux)
+        if: runner.os != 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: 유니코드제거기-${{ runner.os }}
-          path: |
-            dist/유니코드제거기.exe
-            dist/유니코드제거기
+          path: dist/유니코드제거기
           if-no-files-found: error
           retention-days: 90

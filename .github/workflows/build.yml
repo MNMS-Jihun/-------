@@ -35,8 +35,47 @@ jobs:
           pip install -r requirements.txt
       
       - name: Build Windows executable
+        shell: pwsh
         run: |
-          python -m PyInstaller --onefile --console --name "유니코드제거기" app.py
+          $env:PYTHONIOENCODING = "utf-8"
+          $env:PYTHONUTF8 = "1"
+          Write-Host "Python version:"
+          python --version
+          Write-Host "Current directory:"
+          Get-Location
+          Write-Host "Files in current directory:"
+          Get-ChildItem | Select-Object Name
+          Write-Host "Building executable..."
+          python -m PyInstaller --onefile --console --name "UnicodeCleaner" --clean app.py
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Build failed with exit code $LASTEXITCODE"
+            Write-Host "Checking dist folder:"
+            if (Test-Path "dist") {
+              Get-ChildItem -Path dist -Recurse | Format-Table FullName, Length
+            }
+            exit 1
+          }
+          Write-Host "Build completed successfully"
+      
+      - name: Rename executable
+        shell: pwsh
+        run: |
+          Write-Host "Checking for built executable..."
+          if (Test-Path "dist\UnicodeCleaner.exe") {
+            Write-Host "Found UnicodeCleaner.exe, renaming..."
+            Copy-Item "dist\UnicodeCleaner.exe" "dist\유니코드제거기.exe" -Force
+            Write-Host "Executable renamed successfully"
+            Write-Host "File size: $((Get-Item 'dist\유니코드제거기.exe').Length) bytes"
+          } else {
+            Write-Host "Error: UnicodeCleaner.exe not found"
+            Write-Host "Contents of dist folder:"
+            if (Test-Path "dist") {
+              Get-ChildItem -Path dist -Recurse | Format-Table FullName, Length
+            } else {
+              Write-Host "dist folder does not exist"
+            }
+            exit 1
+          }
       
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -44,6 +83,7 @@ jobs:
           name: 유니코드제거기-windows
           path: dist/유니코드제거기.exe
           retention-days: 90
+          if-no-files-found: error
 
   build-macos:
     if: github.event.inputs.build_macos != 'false'
@@ -63,8 +103,9 @@ jobs:
       
       - name: Build macOS executable
         run: |
-          python3 -m PyInstaller --onefile --console --name "유니코드제거기" app.py
-          chmod +x dist/유니코드제거기
+          python3 -m PyInstaller --onefile --console --name "UnicodeCleaner" --clean app.py
+          chmod +x dist/UnicodeCleaner
+          cp dist/UnicodeCleaner dist/유니코드제거기
       
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4

@@ -24,12 +24,22 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 echo.
 
-REM PyInstaller로 실행 파일 생성
+REM PyInstaller로 실행 파일 생성 (영문 이름으로 빌드)
 echo 실행 파일을 빌드하는 중...
-python -m PyInstaller --onefile --console --name "유니코드제거기" --icon=NONE app.py
+python -m PyInstaller --onefile --console --name "UnicodeCleaner" --clean app.py
+if errorlevel 1 (
+    echo ========================================
+    echo 빌드 실패
+    echo ========================================
+    echo 오류가 발생했습니다. 위의 메시지를 확인하세요.
+    pause
+    exit /b 1
+)
 echo.
 
-if exist "dist\유니코드제거기.exe" (
+REM 한글 이름으로 변경
+if exist "dist\UnicodeCleaner.exe" (
+    copy /Y "dist\UnicodeCleaner.exe" "dist\유니코드제거기.exe" >nul
     echo ========================================
     echo 빌드 완료!
     echo ========================================
@@ -40,7 +50,7 @@ if exist "dist\유니코드제거기.exe" (
     echo ========================================
     echo 빌드 실패
     echo ========================================
-    echo 오류가 발생했습니다. 위의 메시지를 확인하세요.
+    echo UnicodeCleaner.exe 파일을 찾을 수 없습니다.
 )
 
 echo.
