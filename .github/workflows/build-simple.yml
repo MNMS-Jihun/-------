@@ -69,7 +69,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: 유니코드제거기-windows
+          name: unicode-cleaner-windows
           path: dist/유니코드제거기.exe
           if-no-files-found: error
           retention-days: 90
@@ -78,7 +78,7 @@ jobs:
         if: runner.os != 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: 유니코드제거기-${{ runner.os }}
+          name: unicode-cleaner-${{ runner.os }}
           path: dist/유니코드제거기
           if-no-files-found: error
           retention-days: 90

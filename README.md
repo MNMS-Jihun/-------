@@ -9,7 +9,8 @@ GitHub에 코드를 푸시하면 자동으로 빌드됩니다:
 1. **GitHub Actions에서 다운로드**:
    - GitHub 저장소의 `Actions` 탭으로 이동
    - 최근 빌드 작업을 선택
-   - `Artifacts` 섹션에서 `유니코드제거기-windows` 또는 `유니코드제거기-macos` 다운로드
+   - `Artifacts` 섹션에서 `unicode-cleaner-windows` 또는 `unicode-cleaner-macos` 다운로드
+   - 다운로드한 ZIP 파일을 압축 해제하면 실행 파일이 있습니다
 
 2. **태그를 사용한 릴리스**:
    - `git tag v1.0.0` (버전 태그 생성)

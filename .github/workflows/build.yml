@@ -80,7 +80,7 @@ jobs:
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 유니코드제거기-windows
+          name: unicode-cleaner-windows
           path: dist/유니코드제거기.exe
           retention-days: 90
           if-no-files-found: error
@@ -110,7 +110,7 @@ jobs:
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 유니코드제거기-macos
+          name: unicode-cleaner-macos
           path: dist/유니코드제거기
           retention-days: 90
 
@@ -124,13 +124,13 @@ jobs:
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: 유니코드제거기-windows
+          name: unicode-cleaner-windows
           path: release/
       
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: 유니코드제거기-macos
+          name: unicode-cleaner-macos
           path: release/
       
       - name: Create Release
